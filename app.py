@@ -18,7 +18,6 @@ st.caption("Commercial Decision Support System for Chartering Managers & Port Op
 st.sidebar.header("🚢 Voyage & Cargo Parameters")
 
 cargo_qty = st.sidebar.number_input("Cargo Quantity (Metric Tons)", min_value=10000, max_value=500000, value=150000, step=5000)
-demurrage_rate = st.sidebar.number_input("Daily Demurrage Rate ($ USD / day)", min_value=5000.0, max_value=100000.0, value=30000.0, step=1000.0)
 
 origin_port = st.sidebar.selectbox("Origin Port", ["Hay Point (Australia)", "Newcastle (Australia)", "Saldanha Bay (South Africa)", "Port Hedland (Australia)"])
 destination_port = st.sidebar.selectbox("Destination Port (India)", ["Paradip Port", "Visakhapatnam Port", "Haldia Port", "Dhamra Port", "Gopalpur Port"])
@@ -34,24 +33,35 @@ port_draft_database = {
 
 auto_max_draft = port_draft_database.get(destination_port, 15.00)
 
-# --- AUTOMATIC VESSEL OPTIMIZATION ENGINE ---
-def optimize_vessel(cargo_tons, port_max_draft):
+# --- AUTOMATIC VESSEL & DEMURRAGE RATE OPTIMIZATION ENGINE ---
+def optimize_vessel_and_demurrage(cargo_tons, port_max_draft):
     if cargo_tons >= 200000 and port_max_draft >= 17.0:
-        return "MV ORE BRASIL (400k DWT Valemax)", 18.0
+        return "MV ORE BRASIL (400k DWT Valemax)", 18.0, 45000.0
     elif cargo_tons >= 100000 and port_max_draft >= 16.0:
-        return "MV CAPESIZE HERO (180k DWT Capesize)", 16.5
+        return "MV CAPESIZE HERO (180k DWT Capesize)", 16.5, 30000.0
     elif cargo_tons >= 60000 and port_max_draft >= 11.0:
-        return "MV PANAMAX STAR (75k DWT Panamax)", 12.0
+        return "MV PANAMAX STAR (75k DWT Panamax)", 12.0, 20000.0
     else:
-        return "MV SUPRAMAX OCEAN (55k DWT Supramax)", 9.0
+        return "MV SUPRAMAX OCEAN (55k DWT Supramax)", 9.0, 15000.0
 
-auto_vessel, auto_vessel_draft = optimize_vessel(cargo_qty, auto_max_draft)
+auto_vessel, auto_vessel_draft, auto_demurrage_rate = optimize_vessel_and_demurrage(cargo_qty, auto_max_draft)
+
+# Allow manual override if needed, pre-filled with AI Auto-fetched value
+demurrage_rate = st.sidebar.number_input(
+    "Daily Demurrage Rate ($ USD / day)", 
+    min_value=5000.0, 
+    max_value=100000.0, 
+    value=float(auto_demurrage_rate), 
+    step=1000.0,
+    help="Auto-fetched based on AI Vessel Selection. You can override if required."
+)
 
 # Sidebar Display - Dynamic AI Selection
 st.sidebar.markdown("---")
-st.sidebar.header("🤖 AI Vessel Selection")
+st.sidebar.header("🤖 AI Auto-Selection Summary")
 st.sidebar.success(f"**Selected Vessel:**\n{auto_vessel}")
 st.sidebar.info(f"**Port Draft Limit:** `{auto_max_draft} m` | **Vessel Draft:** `{auto_vessel_draft} m`")
+st.sidebar.caption(f"**Auto-Fetched Demurrage Rate:** `${auto_demurrage_rate:,.0f} / day`")
 
 # Calculations & Logic Engine
 current_rate = 18.50  # USD/MT
