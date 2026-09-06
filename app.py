@@ -17,21 +17,13 @@ st.caption("Commercial Decision Support System for Chartering Managers & Port Op
 # Sidebar Inputs
 st.sidebar.header("🚢 Voyage & Cargo Parameters")
 
-vessel_list = [
-    "MV ORE BRASIL (400k DWT Valemax)",
-    "MV CAPESIZE HERO (180k DWT Capesize)",
-    "MV PANAMAX STAR (75k DWT Panamax)",
-    "MV SUPRAMAX OCEAN (55k DWT Supramax)"
-]
-selected_vessel = st.sidebar.selectbox("Select Vessel", vessel_list)
-
 cargo_qty = st.sidebar.number_input("Cargo Quantity (Metric Tons)", min_value=10000, max_value=500000, value=150000, step=5000)
 demurrage_rate = st.sidebar.number_input("Daily Demurrage Rate ($ USD / day)", min_value=5000.0, max_value=100000.0, value=30000.0, step=1000.0)
 
 origin_port = st.sidebar.selectbox("Origin Port", ["Hay Point (Australia)", "Newcastle (Australia)", "Saldanha Bay (South Africa)", "Port Hedland (Australia)"])
 destination_port = st.sidebar.selectbox("Destination Port (India)", ["Paradip Port", "Visakhapatnam Port", "Haldia Port", "Dhamra Port", "Gopalpur Port"])
 
-# --- PORT DRAFT DATABASE & AUTO-FETCH LOGIC ---
+# --- PORT DRAFT DATABASE ---
 port_draft_database = {
     "Paradip Port": 17.50,
     "Visakhapatnam Port": 16.10,
@@ -40,20 +32,26 @@ port_draft_database = {
     "Gopalpur Port": 14.50
 }
 
-# Automatically fetch port draft depth based on selected destination port
 auto_max_draft = port_draft_database.get(destination_port, 15.00)
 
-st.sidebar.markdown("---")
-st.sidebar.header("🚆 Vessel & Port Operations")
-st.sidebar.info(f"**Auto-Fetched Max Draft for {destination_port}:** `{auto_max_draft} meters`")
+# --- AUTOMATIC VESSEL OPTIMIZATION ENGINE ---
+def optimize_vessel(cargo_tons, port_max_draft):
+    if cargo_tons >= 200000 and port_max_draft >= 17.0:
+        return "MV ORE BRASIL (400k DWT Valemax)", 18.0
+    elif cargo_tons >= 100000 and port_max_draft >= 16.0:
+        return "MV CAPESIZE HERO (180k DWT Capesize)", 16.5
+    elif cargo_tons >= 60000 and port_max_draft >= 11.0:
+        return "MV PANAMAX STAR (75k DWT Panamax)", 12.0
+    else:
+        return "MV SUPRAMAX OCEAN (55k DWT Supramax)", 9.0
 
-vessel_draft_input = st.sidebar.slider(
-    "Vessel Draft Depth (Meters)",
-    min_value=5.0,
-    max_value=25.0,
-    value=float(auto_max_draft),
-    help="Automatically dynamically set to destination port max draft depth limit."
-)
+auto_vessel, auto_vessel_draft = optimize_vessel(cargo_qty, auto_max_draft)
+
+# Sidebar Display - Dynamic AI Selection
+st.sidebar.markdown("---")
+st.sidebar.header("🤖 AI Vessel Selection")
+st.sidebar.success(f"**Selected Vessel:**\n{auto_vessel}")
+st.sidebar.info(f"**Port Draft Limit:** `{auto_max_draft} m` | **Vessel Draft:** `{auto_vessel_draft} m`")
 
 # Calculations & Logic Engine
 current_rate = 18.50  # USD/MT
@@ -87,25 +85,25 @@ with col3:
 with col4:
     st.metric("Total Congestion Queue", f"{tidal_delay_hours} Hours")
 
-# Draft & Congestion Module Info
+# Operational Intelligence Modules
 st.markdown("---")
-c1, c2, c3 = st.columns(3)
+m1, m2, m3 = st.columns(3)
 
-with c1:
+with m1:
     st.markdown("### 📊 Module 1: Rate Forecaster")
-    st.write(f"**Current Freight Rate:** ${current_rate} / MT")
-    st.write(f"**7-Day AI Target Rate:** ${predicted_rate} / MT")
+    st.write(f"**Current Freight Rate:** ${current_rate:.2f} / MT")
+    st.write(f"**7-Day AI Target Rate:** ${predicted_rate:.2f} / MT")
 
-with c2:
-    st.markdown("### 🚢 Module 2: Draft & Vessel Clearance")
-    st.write(f"**Vessel Draft:** {vessel_draft_input} m")
-    st.write(f"**{destination_port} Depth Limit:** {auto_max_draft} m")
-    if vessel_draft_input <= auto_max_draft:
+with m2:
+    st.markdown("### 🚢 Module 2: Draft Clearance")
+    st.write(f"**Selected Vessel:** {auto_vessel}")
+    st.write(f"**Vessel Draft:** {auto_vessel_draft} m | **Port Max Draft:** {auto_max_draft} m")
+    if auto_vessel_draft <= auto_max_draft:
         st.success("✅ Safe Draft Clearance")
     else:
-        st.error("❌ CRITICAL: Draft Limit Violation!")
+        st.error("⚠️ WARNING: Draft Violation Risk!")
 
-with c3:
+with m3:
     st.markdown("### 🌊 Module 3: Live Weather & Congestion")
     st.write("**Live Ocean Wave Height:** 2.4 m")
     st.write("**Weather Status:** Moderate Swell")
