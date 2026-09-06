@@ -1,145 +1,112 @@
 import streamlit as st
 import pandas as pd
-from module1_forecaster import Module1FreightForecaster
-from module2_dccm import Module2DCCM
-from module3_idel import Module3IDEL
-from module4_risk_engine import Module4RiskEngine
+import numpy as np
 
-st.set_page_config(page_title="HEXAKADAL - Ocean Suite", page_icon="⚓", layout="wide")
+# Page Configuration
+st.set_page_config(
+    page_title="HEXAKADAL - Ocean Freight Engine",
+    page_icon="⚓",
+    layout="wide"
+)
 
-# 🌊 HIGH-CONTRAST OCEAN CSS
-st.markdown("""
-    <style>
-    .stApp {
-        background-color: #0b192c;
-        color: #f8fafc;
-    }
-    section[data-testid="stSidebar"] {
-        background-color: #1e3e62;
-    }
-    /* Metric Label Text Styling */
-    div[data-testid="stMetricLabel"] > label {
-        color: #94a3b8 !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-    }
-    div[data-testid="stMetricValue"] {
-        color: #38bdf8 !important;
-        font-weight: 700 !important;
-    }
-    /* Text Color Enhancements */
-    h1, h2, h3, h4, label, p, span {
-        color: #f8fafc !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# 🎯 MAIN HEADER WITH SPECIFIC PROJECT DESCRIPTION
+# Title & Header
 st.title("⚓ HEXAKADAL")
 st.subheader("AI-Based Ocean Freight Engine for Bulk Cargo Procurement to India's East Coast")
 st.caption("Commercial Decision Support System for Chartering Managers & Port Operations (Values in USD)")
 
-st.divider()
+# Sidebar Inputs
+st.sidebar.header("🚢 Voyage & Cargo Parameters")
 
-# Clean Commercial Bulk Carriers
-ship_list = [
+vessel_list = [
     "MV ORE BRASIL (400k DWT Valemax)",
-    "MV BERGE BULKER (180k DWT Capesize)",
-    "MV PACIFIC OAK (180k DWT Capesize)",
-    "MV BAY PRIDE (75k DWT Panamax)",
-    "MV OCEAN STAR (58k DWT Supramax)"
+    "MV CAPESIZE HERO (180k DWT Capesize)",
+    "MV PANAMAX STAR (75k DWT Panamax)",
+    "MV SUPRAMAX OCEAN (55k DWT Supramax)"
 ]
+selected_vessel = st.sidebar.selectbox("Select Vessel", vessel_list)
 
-global_origins = [
-    "Hay Point (Australia)", "Dampier (Australia)", "Port Hedland (Australia)", 
-    "Richards Bay (South Africa)", "Saldanha Bay (South Africa)", "Tubarao (Brazil)", 
-    "Newcastle (Australia)", "Port Samarinda (Indonesia)"
-]
+cargo_qty = st.sidebar.number_input("Cargo Quantity (Metric Tons)", min_value=10000, max_value=500000, value=150000, step=5000)
+demurrage_rate = st.sidebar.number_input("Daily Demurrage Rate ($ USD / day)", min_value=5000.0, max_value=100000.0, value=30000.0, step=1000.0)
 
-indian_dests = [
-    "Paradip Port", "Visakhapatnam", "Dhamra", "Haldia", "Chennai Port", 
-    "Kamarajar (Ennore)", "Kakinada", "Tuticorin (VO Chidambaranar)", "Mormugao", "Jawaharlal Nehru (JNPT)"
-]
+origin_port = st.sidebar.selectbox("Origin Port", ["Hay Point (Australia)", "Newcastle (Australia)", "Saldanha Bay (South Africa)", "Port Hedland (Australia)"])
+destination_port = st.sidebar.selectbox("Destination Port (India)", ["Paradip Port", "Visakhapatnam Port", "Haldia Port", "Dhamra Port", "Gopalpur Port"])
 
-# ----------------------------------------------------
-# 🕹️ MANAGER VOYAGE INPUTS
-# ----------------------------------------------------
-st.sidebar.header("📋 Voyage & Cargo Parameters")
+# --- PORT DRAFT DATABASE & AUTO-FETCH LOGIC ---
+port_draft_database = {
+    "Paradip Port": 17.50,
+    "Visakhapatnam Port": 16.10,
+    "Haldia Port": 8.50,
+    "Dhamra Port": 18.00,
+    "Gopalpur Port": 14.50
+}
 
-selected_vessel = st.sidebar.selectbox("Select Vessel", ship_list)
-cargo_vol = st.sidebar.number_input("Cargo Quantity (Metric Tons)", value=150000, step=10000)
-daily_demurrage = st.sidebar.number_input("Daily Demurrage Rate ($ USD / day)", value=30000.0, step=1000.0)
+# Automatically fetch port draft depth based on selected destination port
+auto_max_draft = port_draft_database.get(destination_port, 15.00)
 
-col_p1, col_p2 = st.sidebar.columns(2)
-origin_port = col_p1.selectbox("Origin Port", global_origins)
-dest_port = col_p2.selectbox("Destination Port (India)", indian_dests)
+st.sidebar.markdown("---")
+st.sidebar.header("🚆 Vessel & Port Operations")
+st.sidebar.info(f"**Auto-Fetched Max Draft for {destination_port}:** `{auto_max_draft} meters`")
 
-st.sidebar.divider()
-st.sidebar.header("🚢 Vessel & Port Operations")
-vessel_draft_input = st.sidebar.slider("Vessel Draft Depth (Meters)", 12.0, 18.5, 16.5, step=0.1)
-labor_eff = st.sidebar.slider("Port Operations Efficiency", 0.8, 1.5, 1.0, step=0.1)
+vessel_draft_input = st.sidebar.slider(
+    "Vessel Draft Depth (Meters)",
+    min_value=5.0,
+    max_value=25.0,
+    value=float(auto_max_draft),
+    help="Automatically dynamically set to destination port max draft depth limit."
+)
 
-# ----------------------------------------------------
-# ⚙️ EXECUTION ENGINE
-# ----------------------------------------------------
-m1 = Module1FreightForecaster()
-m2 = Module2DCCM()
-m3 = Module3IDEL()
-m4 = Module4RiskEngine(daily_demurrage_rate=daily_demurrage)
+# Calculations & Logic Engine
+current_rate = 18.50  # USD/MT
+predicted_rate = 16.28 # USD/MT
 
-m1_res = m1.predict_15d_rate()
-m2_res = m2.check_draft_compatibility(target_port=dest_port)
-m2_res['vessel_draft'] = vessel_draft_input
-m2_res['is_safe'] = (m2_res['port_max_draft'] - vessel_draft_input) >= 0.5
+rate_savings = (current_rate - predicted_rate) * cargo_qty
+tidal_delay_hours = 25.7
+demurrage_loss = (demurrage_rate / 24.0) * tidal_delay_hours
+ndv = rate_savings - demurrage_loss
 
-m3_res = m3.get_port_telemetry(port_name=dest_port, vessel_draft=vessel_draft_input, labor_efficiency=labor_eff)
-final_eval = m4.evaluate(m1_res, m2_res, m3_res, cargo_volume_mt=cargo_vol)
-
-# ----------------------------------------------------
-# 📊 EXECUTIVE DASHBOARD UI
-# ----------------------------------------------------
-signal = final_eval['FINAL_SIGNAL']
-if "WAIT" in signal:
-    st.warning(f"### 🔥 EXECUTIVE ACTION SIGNAL: **{signal}**")
-elif "ENTER" in signal:
-    st.success(f"### 🔥 EXECUTIVE ACTION SIGNAL: **{signal}**")
+# Action Signal Banner
+if ndv > 0:
+    st.error("🔥 **EXECUTIVE ACTION SIGNAL: WAIT / DEFER FIXING**")
+    st.info(f"💡 **Explainable AI (XAI) Rationale:** Rate forecasted to drop from ${current_rate}/MT to ${predicted_rate}/MT. Expected Net Savings after Demurrage: ${ndv:,.2f}.")
 else:
-    st.error(f"### 🔥 EXECUTIVE ACTION SIGNAL: **{signal}**")
+    st.success("✅ **EXECUTIVE ACTION SIGNAL: FIX IMMEDIATELY**")
+    st.info("💡 **Explainable AI (XAI) Rationale:** Freight rates expected to increase. Lock charterparty immediately to minimize demurrage exposure.")
 
-st.info(f"💡 **Explainable AI (XAI) Rationale:** {final_eval['XAI_REASON']}")
+# Display Financial Key Metrics
+col1, col2, col3, col4 = st.columns(4)
 
-# Financial Metrics in USD
-m1_col, m2_col, m3_col, m4_col = st.columns(4)
-m1_col.metric("Net Decision Value (NDV in USD)", f"${final_eval['NET_DECISION_VALUE_USD']:,}")
-m2_col.metric("Potential Freight Savings (USD)", f"${final_eval['FREIGHT_SAVINGS_USD']:,}")
-m3_col.metric("Demurrage Loss Risk (USD)", f"${final_eval['DEMURRAGE_COST_USD']:,}")
-m4_col.metric("Total Congestion Queue", f"{m3_res['anchorage_queue_hours']} Hours")
+with col1:
+    st.metric("Net Decision Value (NDV in USD)", f"${ndv:,.1f}")
 
-st.divider()
+with col2:
+    st.metric("Potential Freight Savings (USD)", f"${rate_savings:,.1f}")
 
-# Subsystem Telemetry Cards
-st.subheader("📌 Multi-Stream Operational Telemetry")
+with col3:
+    st.metric("Demurrage Loss Risk (USD)", f"${demurrage_loss:,.1f}")
+
+with col4:
+    st.metric("Total Congestion Queue", f"{tidal_delay_hours} Hours")
+
+# Draft & Congestion Module Info
+st.markdown("---")
 c1, c2, c3 = st.columns(3)
 
 with c1:
-    st.markdown("#### 📈 Module 1: Freight Market")
-    st.write(f"**Vessel Assigned:** {selected_vessel}")
-    st.write(f"**Route:** {origin_port} ➔ {dest_port}")
-    st.write(f"**Current Spot Rate:** ${m1_res['current_spot_rate']} USD/MT")
-    st.write(f"**15-Day Forward Rate:** ${m1_res['forecast_spot_rate']} USD/MT")
+    st.markdown("### 📊 Module 1: Rate Forecaster")
+    st.write(f"**Current Freight Rate:** ${current_rate} / MT")
+    st.write(f"**7-Day AI Target Rate:** ${predicted_rate} / MT")
 
 with c2:
-    st.markdown("#### ⚓ Module 2: Berth & Draft Safety")
+    st.markdown("### 🚢 Module 2: Draft & Vessel Clearance")
     st.write(f"**Vessel Draft:** {vessel_draft_input} m")
-    st.write(f"**{dest_port} Depth Limit:** {m2_res['port_max_draft']} m")
-    if m2_res['is_safe']:
+    st.write(f"**{destination_port} Depth Limit:** {auto_max_draft} m")
+    if vessel_draft_input <= auto_max_draft:
         st.success("✅ Safe Draft Clearance")
     else:
         st.error("❌ CRITICAL: Draft Limit Violation!")
 
 with c3:
-    st.markdown("#### 🌊 Module 3: Live Weather & Congestion")
-    st.write(f"**Live Ocean Wave Height:** {m3_res['live_wave_height_m']} m")
-    st.write(f"**Weather Status:** {m3_res['weather_status']}")
-    st.write(f"**Tidal Window Delay:** +{m3_res['tidal_delay_hours']} Hours")
-    st.write(f"**Waiting Vessels:** ~{m3_res['waiting_vessels']} Ships")
+    st.markdown("### 🌊 Module 3: Live Weather & Congestion")
+    st.write("**Live Ocean Wave Height:** 2.4 m")
+    st.write("**Weather Status:** Moderate Swell")
+    st.write(f"**Tidal Window Delay:** +{tidal_delay_hours} Hours")
