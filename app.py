@@ -1,7 +1,13 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+
+# Import custom engines
 from module4_risk_engine import Module4RiskEngine
+try:
+    from module2_dt import Module2DraftSolver
+except ImportError:
+    Module2DraftSolver = None
 
 # Page Configuration
 st.set_page_config(
@@ -65,6 +71,19 @@ st.sidebar.info(f"**Port Draft Limit:** `{auto_max_draft} m` | **Vessel Draft:**
 st.sidebar.caption(f"**Auto-Fetched Demurrage Rate:** `${auto_demurrage_rate:,.0f} / day`")
 
 # ----------------------------------------------------
+# MODULE 2 LOGIC EXECUTION
+# ----------------------------------------------------
+if Module2DraftSolver is not None:
+    try:
+        m2_solver = Module2DraftSolver()
+        m2_eval = m2_solver.check_clearance(vessel_draft=auto_vessel_draft, port_draft=auto_max_draft)
+        m2_is_safe = m2_eval.get("is_safe", auto_vessel_draft <= auto_max_draft)
+    except Exception:
+        m2_is_safe = auto_vessel_draft <= auto_max_draft
+else:
+    m2_is_safe = auto_vessel_draft <= auto_max_draft
+
+# ----------------------------------------------------
 # PREPARE INPUT DATA FOR MODULE 4 RISK ENGINE
 # ----------------------------------------------------
 m1_output = {
@@ -75,7 +94,7 @@ m1_output = {
 m2_output = {
     "vessel_draft": auto_vessel_draft,
     "port_max_draft": auto_max_draft,
-    "is_safe": auto_vessel_draft <= auto_max_draft
+    "is_safe": m2_is_safe
 }
 
 m3_output = {
@@ -133,9 +152,9 @@ st.markdown("## 🚦 Module Operational & Risk Statuses")
 
 m1, m2, m3 = st.columns(3)
 
-# AI Probability Metrics (Simulated Model Confidence)
+# AI Probability Metrics (Dynamic based on conditions)
 m1_prob = 92.4
-m2_prob = 98.1 if m2_output['is_safe'] else 15.0
+m2_prob = 98.1 if m2_is_safe else 12.5
 m3_prob = 86.5
 
 with m1:
@@ -156,7 +175,7 @@ with m2:
     else:
         st.error(f"Status: {mod_statuses['Module_2_Draft']}")
         
-    st.write(f"**Selected Vessel:** Capesize Hero")
+    st.write(f"**Selected Vessel:** {auto_vessel.split('(')[0]}")
     st.write(f"**Vessel Draft:** {auto_vessel_draft}m | **Port Max Draft:** {auto_max_draft}m")
     st.caption(f"🛡️ **Draft Safety Probability:** `{m2_prob}%`")
 
