@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 # Import custom engines
@@ -55,7 +54,6 @@ def optimize_vessel_and_demurrage(cargo_tons, port_max_draft):
     else:
         return "MV SUPRAMAX OCEAN (55k DWT Supramax)", 9.0, 15000.0, 55000
 
-# Fully automated demurrage calculation
 auto_vessel, auto_vessel_draft, demurrage_rate, auto_dwt = optimize_vessel_and_demurrage(cargo_qty, auto_max_draft)
 
 # Sidebar Display Summary
@@ -160,7 +158,6 @@ st.markdown("## 🚦 Module Operational & Risk Statuses")
 
 m1, m2, m3 = st.columns(3)
 
-# AI Probability Metrics
 m1_prob = 92.4
 m2_prob = 98.1 if m2_is_safe else 12.5
 m3_prob = 86.5
@@ -205,42 +202,16 @@ with m3:
 # VISUAL ANALYTICS: BALTIC INDEX XGBOOST FORECAST GRAPH
 # ----------------------------------------------------
 st.markdown("---")
-st.markdown("### 📈 XGBoost Freight Rate Forecast vs Historical Baltic Index (BDI)")
+st.markdown("### 📈 Baltic Dry Index (BDI) Spot Rate Forecast Curve")
 
-# Generate Simulated Data aligned with Baltic CSV pattern for interactive chart
-dates_hist = [datetime.today() - timedelta(days=i) for i in range(14, 0, -1)]
-rates_hist = [19.2, 19.0, 18.8, 18.9, 18.7, 18.6, 18.5, 18.5, 18.4, 18.6, 18.5, 18.4, 18.5, 18.50]
+# Create chart dataframe
+dates = [datetime.today() - timedelta(days=i) for i in range(7, 0, -1)] + [datetime.today() + timedelta(days=i) for i in range(1, 8)]
+hist_data = [18.5, 18.4, 18.6, 18.5, 18.4, 18.5, 18.50] + [None]*7
+pred_data = [None]*6 + [18.50, 18.10, 17.80, 17.40, 17.10, 16.80, 16.50, 16.28]
 
-dates_pred = [datetime.today() + timedelta(days=i) for i in range(1, 8)]
-rates_pred = [18.10, 17.80, 17.40, 17.10, 16.80, 16.50, 16.28]
+chart_df = pd.DataFrame({
+    "Historical Spot Rate ($/MT)": hist_data,
+    "7-Day XGBoost Forecast ($/MT)": pred_data
+}, index=[d.strftime('%b %d') for d in dates])
 
-fig = go.Figure()
-
-# Historical Line
-fig.add_trace(go.Scatter(
-    x=dates_hist, 
-    y=rates_hist, 
-    mode='lines+markers', 
-    name='Historical Spot Rate ($/MT)', 
-    line=dict(color='#00d2ff', width=3)
-))
-
-# 7-Day XGBoost Forecast Line
-fig.add_trace(go.Scatter(
-    x=[dates_hist[-1]] + dates_pred, 
-    y=[rates_hist[-1]] + rates_pred, 
-    mode='lines+markers', 
-    name='7-Day XGBoost Predicted Horizon', 
-    line=dict(color='#ff4b4b', width=3, dash='dash')
-))
-
-fig.update_layout(
-    title="Baltic Index Freight Spot Rate ($/MT) - 7-Day Rolling Forecast Curve",
-    xaxis_title="Date",
-    yaxis_title="Freight Spot Rate ($ / Metric Ton)",
-    template="plotly_dark",
-    height=400,
-    margin=dict(l=20, r=20, t=50, b=20)
-)
-
-st.plotly_chart(fig, use_container_width=True)
+st.line_chart(chart_df)
