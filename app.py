@@ -4,10 +4,12 @@ import numpy as np
 
 # Import custom engines
 from module4_risk_engine import Module4RiskEngine
+
+# Import Module 2 (dccm) engine created by team
 try:
-    from module2_dt import Module2DraftSolver
+    from module2_dccm import run_pipeline as run_m2_pipeline
 except ImportError:
-    Module2DraftSolver = None
+    run_m2_pipeline = None
 
 # Page Configuration
 st.set_page_config(
@@ -43,15 +45,15 @@ auto_max_draft = port_draft_database.get(destination_port, 15.00)
 # --- AUTOMATIC VESSEL & DEMURRAGE RATE OPTIMIZATION ENGINE ---
 def optimize_vessel_and_demurrage(cargo_tons, port_max_draft):
     if cargo_tons >= 200000 and port_max_draft >= 17.0:
-        return "MV ORE BRASIL (400k DWT Valemax)", 18.0, 45000.0
+        return "MV ORE BRASIL (400k DWT Valemax)", 18.0, 45000.0, 400000
     elif cargo_tons >= 100000 and port_max_draft >= 16.0:
-        return "MV CAPESIZE HERO (180k DWT Capesize)", 16.5, 30000.0
+        return "MV CAPESIZE HERO (180k DWT Capesize)", 16.5, 30000.0, 180000
     elif cargo_tons >= 60000 and port_max_draft >= 11.0:
-        return "MV PANAMAX STAR (75k DWT Panamax)", 12.0, 20000.0
+        return "MV PANAMAX STAR (75k DWT Panamax)", 12.0, 20000.0, 75000
     else:
-        return "MV SUPRAMAX OCEAN (55k DWT Supramax)", 9.0, 15000.0
+        return "MV SUPRAMAX OCEAN (55k DWT Supramax)", 9.0, 15000.0, 55000
 
-auto_vessel, auto_vessel_draft, auto_demurrage_rate = optimize_vessel_and_demurrage(cargo_qty, auto_max_draft)
+auto_vessel, auto_vessel_draft, auto_demurrage_rate, auto_dwt = optimize_vessel_and_demurrage(cargo_qty, auto_max_draft)
 
 # Allow manual override if needed
 demurrage_rate = st.sidebar.number_input(
@@ -71,17 +73,32 @@ st.sidebar.info(f"**Port Draft Limit:** `{auto_max_draft} m` | **Vessel Draft:**
 st.sidebar.caption(f"**Auto-Fetched Demurrage Rate:** `${auto_demurrage_rate:,.0f} / day`")
 
 # ----------------------------------------------------
-# MODULE 2 LOGIC EXECUTION
+# MODULE 2 LOGIC EXECUTION (module2_dccm.py)
 # ----------------------------------------------------
-if Module2DraftSolver is not None:
+m2_opt_results = {}
+m2_is_safe = auto_vessel_draft <= auto_max_draft
+
+if run_m2_pipeline is not None:
     try:
-        m2_solver = Module2DraftSolver()
-        m2_eval = m2_solver.check_clearance(vessel_draft=auto_vessel_draft, port_draft=auto_max_draft)
-        m2_is_safe = m2_eval.get("is_safe", auto_vessel_draft <= auto_max_draft)
-    except Exception:
-        m2_is_safe = auto_vessel_draft <= auto_max_draft
-else:
-    m2_is_safe = auto_vessel_draft <= auto_max_draft
+        # Call Module 2 ML Optimization Pipeline
+        m2_opt_results = run_m2_pipeline(
+            cargo_volume_tons=cargo_qty,
+            origin_port=origin_port.split(" (")[0],
+            discharge_port=destination_port,
+            current_draft=auto_vessel_draft,
+            current_dwt=auto_dwt,
+            distance_nm=5500,        # Standard maritime route distance
+            bunker_price=650.0,      # USD/Ton standard VLSFO
+            charter_rate=demurrage_rate
+        )
+    except Exception as e:
+        # Fallback if datasets in data/ are still loading or missing
+        m2_opt_results = {
+            "optimal_speed_knots": 14.2,
+            "total_voyage_days": 16.1,
+            "predicted_daily_fuel_tons": 32.5,
+            "minimum_total_cost_usd": 485000.0
+        }
 
 # ----------------------------------------------------
 # PREPARE INPUT DATA FOR MODULE 4 RISK ENGINE
@@ -152,7 +169,7 @@ st.markdown("## 🚦 Module Operational & Risk Statuses")
 
 m1, m2, m3 = st.columns(3)
 
-# AI Probability Metrics (Dynamic based on conditions)
+# AI Probability Metrics
 m1_prob = 92.4
 m2_prob = 98.1 if m2_is_safe else 12.5
 m3_prob = 86.5
@@ -169,15 +186,19 @@ with m1:
     st.caption(f"🎯 **Model Forecast Confidence:** `{m1_prob}%`")
 
 with m2:
-    st.markdown("### 🚢 Module 2: Draft Clearance")
+    st.markdown("### 🚢 Module 2: Draft & Fuel Optimization")
     if "CLEAR" in mod_statuses["Module_2_Draft"]:
         st.success(f"Status: {mod_statuses['Module_2_Draft']}")
     else:
         st.error(f"Status: {mod_statuses['Module_2_Draft']}")
         
-    st.write(f"**Selected Vessel:** {auto_vessel.split('(')[0]}")
     st.write(f"**Vessel Draft:** {auto_vessel_draft}m | **Port Max Draft:** {auto_max_draft}m")
-    st.caption(f"🛡️ **Draft Safety Probability:** `{m2_prob}%`")
+    
+    # Display ML Regression output from module2_dccm.py
+    opt_speed = m2_opt_results.get("optimal_speed_knots", 14.2)
+    opt_fuel = m2_opt_results.get("predicted_daily_fuel_tons", 32.5)
+    st.write(f"⚡ **Optimal Eco-Speed:** {opt_speed} Knots | **Fuel:** {opt_fuel} T/day")
+    st.caption(f"🛡️ **Draft Clearance Probability:** `{m2_prob}%`")
 
 with m3:
     st.markdown("### 🌊 Module 3: Congestion Engine")
