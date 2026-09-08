@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import datetime
 
-# Import Custom Modules safely
+# Safe Imports of Custom Modules
 try:
     from module4_risk_engine import Module4RiskEngine
 except ImportError:
@@ -55,18 +55,47 @@ port_draft_database = {
 
 auto_max_draft = port_draft_database.get(destination_port, 15.00)
 
-# Automatic Vessel Selection Matrix
-def optimize_vessel_and_demurrage(cargo_tons, port_max_draft):
+# ---------------------------------------------------------
+# DYNAMIC VESSEL SELECTION & OPTIMIZATION ENGINE (MODULE 2 DATA)
+# ---------------------------------------------------------
+def optimize_vessel_data(cargo_tons, port_max_draft):
     if cargo_tons >= 200000 and port_max_draft >= 17.0:
-        return "MV ORE BRASIL (400k DWT Valemax)", 18.0, 45000.0
+        return {
+            "vessel_name": "MV ORE BRASIL (400k DWT Valemax)",
+            "vessel_draft": 18.0,
+            "demurrage_rate": 45000.0,
+            "eco_speed": "13.5 Knots",
+            "fuel_cons": "42.0 T/day"
+        }
     elif cargo_tons >= 100000 and port_max_draft >= 16.0:
-        return "MV CAPESIZE HERO (180k DWT Capesize)", 16.5, 30000.0
+        return {
+            "vessel_name": "MV CAPESIZE HERO (180k DWT Capesize)",
+            "vessel_draft": 16.5,
+            "demurrage_rate": 30000.0,
+            "eco_speed": "14.2 Knots",
+            "fuel_cons": "32.5 T/day"
+        }
     elif cargo_tons >= 60000 and port_max_draft >= 11.0:
-        return "MV PANAMAX STAR (75k DWT Panamax)", 12.0, 20000.0
+        return {
+            "vessel_name": "MV PANAMAX STAR (75k DWT Panamax)",
+            "vessel_draft": 12.0,
+            "demurrage_rate": 20000.0,
+            "eco_speed": "13.0 Knots",
+            "fuel_cons": "24.0 T/day"
+        }
     else:
-        return "MV SUPRAMAX OCEAN (55k DWT Supramax)", 9.0, 15000.0
+        return {
+            "vessel_name": "MV SUPRAMAX OCEAN (55k DWT Supramax)",
+            "vessel_draft": 9.0,
+            "demurrage_rate": 15000.0,
+            "eco_speed": "12.5 Knots",
+            "fuel_cons": "18.5 T/day"
+        }
 
-auto_vessel, auto_vessel_draft, demurrage_rate = optimize_vessel_and_demurrage(cargo_qty, auto_max_draft)
+vessel_info = optimize_vessel_data(cargo_qty, auto_max_draft)
+auto_vessel = vessel_info["vessel_name"]
+auto_vessel_draft = vessel_info["vessel_draft"]
+demurrage_rate = vessel_info["demurrage_rate"]
 
 st.sidebar.markdown("---")
 st.sidebar.header("🤖 AI Auto-Selection Summary")
@@ -127,7 +156,7 @@ else:
     demurrage_risk = (total_delay / 24.0) * demurrage_rate
     ndv = potential_savings - demurrage_risk
 
-# Dynamic Dates
+# Dynamic Execution Dates
 today = datetime.date.today()
 target_fix_date = (today + datetime.timedelta(days=7)).strftime("%d-%m-%Y")
 laycan_start = (today + datetime.timedelta(days=12)).strftime("%d-%m-%Y")
@@ -152,7 +181,7 @@ else:
         f"⚓ **Action:** Lock current spot market rates immediately to avoid price spikes."
     )
 
-# Top Metrics Row
+# Metrics Row
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Net Decision Value (NDV)", f"${ndv:,.2f}")
 c2.metric("Potential Freight Savings", f"${potential_savings:,.2f}")
@@ -179,8 +208,11 @@ with col2:
         st.success("Status: CLEAR (Draft Clearance Passed)")
     else:
         st.error("Status: RISK (Draft Exceeded)")
-    st.write(f"**Vessel Draft:** {auto_vessel_draft}m | **Port Max Draft:** {auto_max_draft}m")
-    st.write("⚡ **Optimal Eco-Speed:** 14.2 Knots | **Fuel:** 32.5 T/day")
+    
+    # Dynamic Vessel Optimization Output
+    st.write(f"🚢 **Recommended Vessel:** **{vessel_info['vessel_name']}**")
+    st.write(f"📏 **Vessel Draft:** `{vessel_info['vessel_draft']}m` | **Port Max Draft:** `{auto_max_draft}m`")
+    st.write(f"⚡ **Optimal Eco-Speed:** `{vessel_info['eco_speed']}` | **Fuel:** `{vessel_info['fuel_cons']}`")
     st.caption("Draft Clearance Probability: 99.1%")
 
 with col3:
