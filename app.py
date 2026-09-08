@@ -23,149 +23,168 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# ENTERPRISE MATTE GRAPHITE STYLING
+# PROFESSIONAL WHITE & LIGHT BLUE ENTERPRISE CSS
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-    /* Dark Slate & Graphite Palette */
+    /* Global Application Theme (Clean White/Ice Blue) */
     .stApp {
-        background-color: #0d1117;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: #f8fafc;
+        color: #0f172a;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    /* Uniform Sidebar Theme */
+    section[data-testid="stSidebar"] {
+        background-color: #ffffff;
+        border-right: 1px solid #e2e8f0;
     }
     
     /* Header Section */
     .header-container {
-        padding: 10px 0 16px 0;
-        border-bottom: 1px solid #21262d;
+        background-color: #ffffff;
+        padding: 20px 24px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         margin-bottom: 20px;
     }
     .problem-code {
-        background-color: #161b22;
-        color: #8b949e;
-        padding: 3px 8px;
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        padding: 4px 10px;
         border-radius: 4px;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         letter-spacing: 0.05em;
-        border: 1px solid #30363d;
+        border: 1px solid #bfdbfe;
         display: inline-block;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
     .header-title {
-        color: #f0f6fc;
-        font-size: 1.8rem;
-        font-weight: 700;
+        color: #0f172a;
+        font-size: 2rem;
+        font-weight: 800;
         margin: 0;
         display: inline-block;
     }
     .header-subtitle {
-        color: #8b949e;
-        font-size: 0.95rem;
-        font-weight: 400;
+        color: #475569;
+        font-size: 1rem;
+        font-weight: 500;
         margin-left: 10px;
     }
     
-    /* Executive Metric Box */
-    .metric-box {
-        background: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 6px;
-        padding: 14px 16px;
-    }
-    .metric-label {
-        font-size: 0.72rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: #8b949e;
-        letter-spacing: 0.04em;
-        margin-bottom: 4px;
-    }
-    .metric-value-savings {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #3fb950;
-    }
-    .metric-value-risk {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #f85149;
-    }
-    .metric-value-neutral {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #f0f6fc;
-    }
-    .metric-sub {
-        font-size: 0.72rem;
-        color: #6e7681;
-        margin-top: 2px;
-    }
-
-    /* Module 4 Action Banner */
+    /* Decision Action Banner (Light Blue Glow) */
     .decision-banner {
-        background-color: #161b22;
-        border-left: 4px solid #d29922;
-        border-top: 1px solid #30363d;
-        border-right: 1px solid #30363d;
-        border-bottom: 1px solid #30363d;
-        border-radius: 4px;
-        padding: 12px 16px;
-        margin-bottom: 20px;
+        background-color: #f0f9ff;
+        border-left: 5px solid #0284c7;
+        border-top: 1px solid #bae6fd;
+        border-right: 1px solid #bae6fd;
+        border-bottom: 1px solid #bae6fd;
+        border-radius: 6px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
     }
     .decision-title {
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #f0f6fc;
-        margin-bottom: 2px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #0369a1;
+        margin-bottom: 4px;
         letter-spacing: 0.02em;
     }
     .decision-details {
-        font-size: 0.82rem;
-        color: #8b949e;
+        font-size: 0.88rem;
+        color: #334155;
     }
 
-    /* Analytical Modules */
+    /* Metric Cards (Ice Blue & Slate) */
+    .metric-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 18px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+    .metric-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        letter-spacing: 0.04em;
+        margin-bottom: 6px;
+    }
+    .metric-value-savings {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #15803d;
+    }
+    .metric-value-risk {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #b91c1c;
+    }
+    .metric-value-neutral {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0369a1;
+    }
+    .metric-sub {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    /* Analytical Module Cards */
     .module-card {
-        background-color: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 6px;
-        padding: 16px;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 18px;
         height: 100%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     }
     .module-title {
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: #f0f6fc;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #0f172a;
     }
     .module-subtitle {
-        font-size: 0.72rem;
-        color: #8b949e;
+        font-size: 0.78rem;
+        color: #64748b;
         margin-bottom: 12px;
-        padding-bottom: 6px;
-        border-bottom: 1px solid #21262d;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f1f5f9;
     }
 
-    /* Status Indicators */
+    /* Status Badges */
     .status-clear {
-        color: #3fb950;
+        background-color: #dcfce7;
+        color: #15803d;
         font-size: 0.7rem;
-        font-weight: 600;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 12px;
     }
     .status-risk {
-        color: #f85149;
+        background-color: #fee2e2;
+        color: #b91c1c;
         font-size: 0.7rem;
-        font-weight: 600;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 12px;
     }
 
+    /* Streamlit Defaults Override */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# SIDEBAR: PARAMETERS
+# SIDEBAR: VOYAGE PARAMETERS
 # ---------------------------------------------------------
-st.sidebar.markdown("<h4 style='color: #f0f6fc; font-size: 0.9rem;'>Voyage Setup</h4>", unsafe_allow_html=True)
+st.sidebar.markdown("<h4 style='color: #0f172a; font-size: 1rem; font-weight: 700;'>Voyage Parameters</h4>", unsafe_allow_html=True)
 
 cargo_qty = st.sidebar.number_input(
     "Cargo Quantity (Metric Tons)", 
@@ -259,19 +278,19 @@ auto_vessel_draft = vessel_info["vessel_draft"]
 demurrage_rate = vessel_info["demurrage_rate"]
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("<h5 style='color: #8b949e; font-size: 0.75rem; text-transform: uppercase;'>Module 2 Summary</h5>", unsafe_allow_html=True)
+st.sidebar.markdown("<h5 style='color: #64748b; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;'>Vessel Optimization Summary</h5>", unsafe_allow_html=True)
 st.sidebar.caption(f"**Target Class:** {vessel_info['ideal_vessel']}")
 
 if vessel_info["is_safe"]:
-    st.sidebar.caption(f"**Feasible Vessel:** {auto_vessel}")
+    st.sidebar.caption(f"**Feasible Ship:** {auto_vessel}")
 else:
     st.sidebar.caption(f"**Draft Constrained:** {auto_vessel}")
 
-st.sidebar.caption(f"**Port Limit:** {auto_max_draft}m | **Req:** {vessel_info['required_draft']}m")
+st.sidebar.caption(f"**Port Depth Limit:** {auto_max_draft}m | **Req:** {vessel_info['required_draft']}m")
 st.sidebar.caption(f"**Demurrage Benchmark:** ${demurrage_rate:,.0f} / day")
 
 # ---------------------------------------------------------
-# CALCULATIONS
+# ENGINE CALCULATIONS
 # ---------------------------------------------------------
 current_rate = 18.50
 target_rate = 16.28
@@ -334,32 +353,32 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# MODULE 4: RISK MITIGATION & DECISION ENGINE BANNER
+# EXECUTIVE DECISION BANNER (NO MODULE 4 MENTION)
 # ---------------------------------------------------------
 if ndv > 0:
     st.markdown(f"""
         <div class='decision-banner'>
-            <div class='decision-title'>MODULE 4: RISK MITIGATION AND DECISION ENGINE — RECOMMENDATION: DEFER FIXING (WAIT 7 DAYS)</div>
+            <div class='decision-title'>RISK MITIGATION & DECISION ENGINE — RECOMMENDATION: DEFER FIXING (WAIT 7 DAYS)</div>
             <div class='decision-details'>
-                Target Charter Fixing Date: <strong style='color: #f0f6fc;'>{target_fix_date}</strong> &nbsp;|&nbsp; 
-                Recommended Laycan Window: <strong style='color: #f0f6fc;'>{laycan_start} – {laycan_end}</strong> &nbsp;|&nbsp; 
-                Net Decision Value (NDV): <strong style='color: #3fb950;'>+${ndv:,.2f}</strong>
+                Target Charter Fixing Date: <strong style='color: #0f172a;'>{target_fix_date}</strong> &nbsp;|&nbsp; 
+                Recommended Laycan Window: <strong style='color: #0f172a;'>{laycan_start} – {laycan_end}</strong> &nbsp;|&nbsp; 
+                Net Decision Value (NDV): <strong style='color: #15803d;'>+${ndv:,.2f}</strong>
             </div>
         </div>
     """, unsafe_allow_html=True)
 else:
     st.markdown(f"""
-        <div class='decision-banner' style='border-left-color: #2ea043;'>
-            <div class='decision-title'>MODULE 4: RISK MITIGATION AND DECISION ENGINE — RECOMMENDATION: FIX CHARTER IMMEDIATELY</div>
+        <div class='decision-banner' style='border-left-color: #16a34a; background-color: #f0fdf4; border-color: #bbf7d0;'>
+            <div class='decision-title' style='color: #15803d;'>RISK MITIGATION & DECISION ENGINE — RECOMMENDATION: FIX CHARTER IMMEDIATELY</div>
             <div class='decision-details'>
-                Target Charter Fixing Date: <strong style='color: #f0f6fc;'>Today ({today.strftime('%d %b %Y')})</strong> &nbsp;|&nbsp; 
+                Target Charter Fixing Date: <strong style='color: #0f172a;'>Today ({today.strftime('%d %b %Y')})</strong> &nbsp;|&nbsp; 
                 Lock current market spot rates to avoid projected upward exposure.
             </div>
         </div>
     """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# METRIC SUMMARY
+# METRIC CARDS
 # ---------------------------------------------------------
 c1, c2, c3, c4 = st.columns(4)
 
@@ -394,7 +413,7 @@ with c4:
     st.markdown(f"""
         <div class='metric-box'>
             <div class='metric-label'>Total Anchorage Delay</div>
-            <div class='metric-value-neutral'>{total_delay:.1f} Hrs</div>
+            <div class='metric-value-neutral' style='color: #0f172a;'>{total_delay:.1f} Hrs</div>
             <div class='metric-sub'>{ais_vessels} vessels in queue</div>
         </div>
     """, unsafe_allow_html=True)
@@ -402,7 +421,7 @@ with c4:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3 ANALYTICAL MODULES
+# 3 CORE ANALYTICAL MODULE CARDS
 # ---------------------------------------------------------
 col1, col2, col3 = st.columns(3)
 
@@ -410,20 +429,20 @@ with col1:
     st.markdown(f"""
         <div class='module-card'>
             <div style='display:flex; justify-content:space-between; align-items:center;'>
-                <div class='module-title'>Module 1: Freight Forecasting Module</div>
-                <div class='status-clear'>● ACTIVE</div>
+                <div class='module-title'>Freight Forecasting Module</div>
+                <div class='status-clear'>ACTIVE</div>
             </div>
             <div class='module-subtitle'>Spot Rate Intelligence & Forecast</div>
             <div style='margin-bottom: 8px;'>
-                <span style='color: #8b949e; font-size: 0.75rem;'>Current Spot Rate:</span><br>
-                <strong style='color: #f0f6fc; font-size: 0.95rem;'>${current_rate:.2f} / MT</strong>
+                <span style='color: #64748b; font-size: 0.78rem;'>Current Spot Rate:</span><br>
+                <strong style='color: #0f172a; font-size: 1rem;'>${current_rate:.2f} / MT</strong>
             </div>
             <div style='margin-bottom: 12px;'>
-                <span style='color: #8b949e; font-size: 0.75rem;'>7-Day AI Forecasted Rate:</span><br>
-                <strong style='color: #3fb950; font-size: 1.05rem;'>${target_rate:.2f} / MT</strong>
+                <span style='color: #64748b; font-size: 0.78rem;'>7-Day AI Forecasted Rate:</span><br>
+                <strong style='color: #15803d; font-size: 1.1rem;'>${target_rate:.2f} / MT</strong>
             </div>
-            <div style='background: #0d1117; padding: 8px 10px; border-radius: 4px; border: 1px solid #21262d;'>
-                <p style='color: #8b949e; font-size: 0.72rem; margin: 0;'>
+            <div style='background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;'>
+                <p style='color: #475569; font-size: 0.75rem; margin: 0;'>
                     BDI & bunker trends project rate reduction over next 7 days.
                 </p>
             </div>
@@ -431,31 +450,31 @@ with col1:
     """, unsafe_allow_html=True)
 
 with col2:
-    status_str = "<div class='status-clear'>● FEASIBLE</div>" if vessel_info["is_safe"] else "<div class='status-risk'>● DRAFT RESTRICTED</div>"
+    status_str = "<div class='status-clear'>FEASIBLE</div>" if vessel_info["is_safe"] else "<div class='status-risk'>DRAFT RESTRICTED</div>"
     
     st.markdown(f"""
         <div class='module-card'>
             <div style='display:flex; justify-content:space-between; align-items:center;'>
-                <div class='module-title'>Module 2: Vessel Optimization Module</div>
+                <div class='module-title'>Vessel Optimization Module</div>
                 {status_str}
             </div>
             <div class='module-subtitle'>Fleet Selection & Navigation Feasibility</div>
             <div style='margin-bottom: 8px;'>
-                <span style='color: #8b949e; font-size: 0.75rem;'>Optimized Vessel:</span><br>
-                <strong style='color: #f0f6fc; font-size: 0.88rem;'>{vessel_info['vessel_name']}</strong>
+                <span style='color: #64748b; font-size: 0.78rem;'>Optimized Vessel:</span><br>
+                <strong style='color: #0f172a; font-size: 0.9rem;'>{vessel_info['vessel_name']}</strong>
             </div>
             <div style='display: flex; gap: 16px; margin-bottom: 12px;'>
                 <div>
-                    <span style='color: #8b949e; font-size: 0.72rem;'>Vessel Draft:</span><br>
-                    <strong style='color: #f0f6fc; font-size: 0.82rem;'>{vessel_info['vessel_draft']}m</strong>
+                    <span style='color: #64748b; font-size: 0.75rem;'>Vessel Draft:</span><br>
+                    <strong style='color: #0f172a; font-size: 0.85rem;'>{vessel_info['vessel_draft']}m</strong>
                 </div>
                 <div>
-                    <span style='color: #8b949e; font-size: 0.72rem;'>Port Max Limit:</span><br>
-                    <strong style='color: #f0f6fc; font-size: 0.82rem;'>{auto_max_draft}m</strong>
+                    <span style='color: #64748b; font-size: 0.75rem;'>Port Max Limit:</span><br>
+                    <strong style='color: #0f172a; font-size: 0.85rem;'>{auto_max_draft}m</strong>
                 </div>
             </div>
-            <div style='background: #0d1117; padding: 8px 10px; border-radius: 4px; border: 1px solid #21262d;'>
-                <p style='color: #8b949e; font-size: 0.72rem; margin: 0;'>
+            <div style='background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;'>
+                <p style='color: #475569; font-size: 0.75rem; margin: 0;'>
                     Eco-Speed: {vessel_info['eco_speed']} &nbsp;|&nbsp; Fuel: {vessel_info['fuel_cons']}
                 </p>
             </div>
@@ -466,20 +485,20 @@ with col3:
     st.markdown(f"""
         <div class='module-card'>
             <div style='display:flex; justify-content:space-between; align-items:center;'>
-                <div class='module-title'>Module 3: IDLE Management Module</div>
-                <div class='status-risk'>● HIGH IDLE</div>
+                <div class='module-title'>IDLE Management Module</div>
+                <div class='status-risk'>HIGH IDLE</div>
             </div>
             <div class='module-subtitle'>Port Telemetry & Anchorage Queue Tracking</div>
             <div style='margin-bottom: 8px;'>
-                <span style='color: #8b949e; font-size: 0.75rem;'>Anchorage Queue:</span><br>
-                <strong style='color: #f0f6fc; font-size: 0.95rem;'>{ais_vessels} Bulk Carriers Waiting</strong>
+                <span style='color: #64748b; font-size: 0.78rem;'>Anchorage Queue:</span><br>
+                <strong style='color: #0f172a; font-size: 1rem;'>{ais_vessels} Bulk Carriers Waiting</strong>
             </div>
             <div style='margin-bottom: 12px;'>
-                <span style='color: #8b949e; font-size: 0.75rem;'>Marine Weather Telemetry:</span><br>
-                <strong style='color: #f0f6fc; font-size: 0.82rem;'>{wave_height}m Wave Height (Swell)</strong>
+                <span style='color: #64748b; font-size: 0.78rem;'>Marine Weather Telemetry:</span><br>
+                <strong style='color: #0f172a; font-size: 0.85rem;'>{wave_height}m Wave Height (Swell)</strong>
             </div>
-            <div style='background: #0d1117; padding: 8px 10px; border-radius: 4px; border: 1px solid #21262d;'>
-                <p style='color: #8b949e; font-size: 0.72rem; margin: 0;'>
+            <div style='background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;'>
+                <p style='color: #475569; font-size: 0.75rem; margin: 0;'>
                     Projected Delay: +{total_delay:.1f} Hours at berth anchorage.
                 </p>
             </div>
