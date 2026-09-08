@@ -53,24 +53,15 @@ def optimize_vessel_and_demurrage(cargo_tons, port_max_draft):
     else:
         return "MV SUPRAMAX OCEAN (55k DWT Supramax)", 9.0, 15000.0, 55000
 
-auto_vessel, auto_vessel_draft, auto_demurrage_rate, auto_dwt = optimize_vessel_and_demurrage(cargo_qty, auto_max_draft)
+# Fully automated demurrage calculation (NO MANUAL INPUT NEEDED)
+auto_vessel, auto_vessel_draft, demurrage_rate, auto_dwt = optimize_vessel_and_demurrage(cargo_qty, auto_max_draft)
 
-# Allow manual override if needed
-demurrage_rate = st.sidebar.number_input(
-    "Daily Demurrage Rate ($ USD / day)", 
-    min_value=5000.0, 
-    max_value=100000.0, 
-    value=float(auto_demurrage_rate), 
-    step=1000.0,
-    help="Auto-fetched based on AI Vessel Selection. You can override if required."
-)
-
-# Sidebar Display
+# Sidebar Display Summary
 st.sidebar.markdown("---")
 st.sidebar.header("🤖 AI Auto-Selection Summary")
 st.sidebar.success(f"**Selected Vessel:**\n{auto_vessel}")
 st.sidebar.info(f"**Port Draft Limit:** `{auto_max_draft} m` | **Vessel Draft:** `{auto_vessel_draft} m`")
-st.sidebar.caption(f"**Auto-Fetched Demurrage Rate:** `${auto_demurrage_rate:,.0f} / day`")
+st.sidebar.caption(f"💰 **Auto-Fetched Demurrage Rate:** `${demurrage_rate:,.0f} / day`")
 
 # ----------------------------------------------------
 # MODULE 2 LOGIC EXECUTION (module2_dccm.py)
@@ -91,8 +82,8 @@ if run_m2_pipeline is not None:
             bunker_price=650.0,      # USD/Ton standard VLSFO
             charter_rate=demurrage_rate
         )
-    except Exception as e:
-        # Fallback if datasets in data/ are still loading or missing
+    except Exception:
+        # Fallback if datasets in data/ are missing or loading
         m2_opt_results = {
             "optimal_speed_knots": 14.2,
             "total_voyage_days": 16.1,
