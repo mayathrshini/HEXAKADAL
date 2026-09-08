@@ -16,108 +16,20 @@ except ImportError:
 
 # Page Configuration
 st.set_page_config(
-    page_title="HEXAKADAL | Commercial Decision Support System",
+    page_title="HEXAKADAL | Maritime Decision Support System",
     page_icon="⚓",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ---------------------------------------------------------
-# PROFESSIONAL SaaS UI CUSTOM CSS
+# SIDEBAR: VOYAGE & CARGO CONFIGURATION
 # ---------------------------------------------------------
-st.markdown("""
-    <style>
-    /* Main Background & Typography */
-    .stApp {
-        background-color: #0d1117;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-    
-    /* Executive Metric Cards */
-    .metric-card {
-        background: linear-gradient(135deg, #161b22 0%, #21262d 100%);
-        border: 1px solid #30363d;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    .metric-card:hover {
-        border-color: #58a6ff;
-        transform: translateY(-2px);
-    }
-    .metric-title {
-        font-size: 0.82rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #8b949e;
-        margin-bottom: 8px;
-    }
-    .metric-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #f0f6fc;
-    }
-    .metric-subtext {
-        font-size: 0.8rem;
-        color: #7d8590;
-        margin-top: 4px;
-    }
+st.sidebar.title("⚓ HEXAKADAL")
+st.sidebar.caption("Ocean Freight Commercial Optimization")
+st.sidebar.markdown("---")
 
-    /* Module Container Cards */
-    .module-card {
-        background-color: #161b22;
-        border: 1px solid #30363d;
-        border-radius: 12px;
-        padding: 22px;
-        height: 100%;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-    .module-header {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #58a6ff;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #21262d;
-    }
-    
-    /* Status Badges */
-    .badge-clear {
-        background-color: rgba(46, 160, 67, 0.15);
-        color: #3fb950;
-        border: 1px solid rgba(46, 160, 67, 0.4);
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    .badge-risk {
-        background-color: rgba(248, 81, 73, 0.15);
-        color: #f85149;
-        border: 1px solid rgba(248, 81, 73, 0.4);
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    
-    /* Clean Streamlit Branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    </style>
-""", unsafe_allow_html=True)
-
-# ---------------------------------------------------------
-# SIDEBAR: INPUT PARAMETERS
-# ---------------------------------------------------------
-st.sidebar.markdown("<h2 style='color: #58a6ff; font-size: 1.3rem; margin-bottom: 0;'>⚙️ Parameters</h2>", unsafe_allow_html=True)
-st.sidebar.caption("Voyage & Cargo Configuration")
-
+st.sidebar.subheader("⚙️ Voyage Parameters")
 cargo_qty = st.sidebar.number_input(
     "Cargo Quantity (Metric Tons)", 
     min_value=10000, 
@@ -147,7 +59,7 @@ port_draft_database = {
 
 auto_max_draft = port_draft_database.get(destination_port, 14.50)
 
-# Vessel Optimization Engine (Module 2)
+# Vessel Optimization Engine
 def optimize_vessel_data(cargo_tons, port_max_draft):
     if cargo_tons >= 200000:
         ideal_vessel = "MV ORE BRASIL (400k DWT Valemax)"
@@ -210,32 +122,16 @@ auto_vessel_draft = vessel_info["vessel_draft"]
 demurrage_rate = vessel_info["demurrage_rate"]
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("<h3 style='font-size: 1rem; color: #8b949e;'>🤖 AI Auto-Selection</h3>", unsafe_allow_html=True)
-st.sidebar.info(f"**Target Ship:**\n{vessel_info['ideal_vessel']}")
+st.sidebar.subheader("🤖 AI Auto-Selection Engine")
+st.sidebar.text(f"Target Vessel:\n{vessel_info['ideal_vessel']}")
 
 if vessel_info["is_safe"]:
-    st.sidebar.success(f"**Feasible Ship:**\n{auto_vessel}")
+    st.sidebar.success(f"Feasible Vessel:\n{auto_vessel}")
 else:
-    st.sidebar.warning(f"⚠️ **Port Draft Restricted:**\n{auto_vessel}")
+    st.sidebar.warning(f"Draft Restricted Vessel:\n{auto_vessel}")
 
-st.sidebar.caption(f"**Port Draft Limit:** `{auto_max_draft}m` | **Req:** `{vessel_info['required_draft']}m`")
-st.sidebar.caption(f"💰 **Demurrage Rate:** `${demurrage_rate:,.0f} / day`")
-
-# ---------------------------------------------------------
-# DASHBOARD HEADER
-# ---------------------------------------------------------
-st.markdown("""
-    <div style='display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #30363d; padding-bottom: 15px; margin-bottom: 25px;'>
-        <div>
-            <h1 style='color: #f0f6fc; font-size: 2.2rem; font-weight: 700; margin: 0;'>⚓ HEXAKADAL</h1>
-            <p style='color: #8b949e; font-size: 0.95rem; margin: 4px 0 0 0;'>Commercial Decision Support System | Ocean Freight Risk Engine</p>
-        </div>
-        <div style='text-align: right;'>
-            <span class='badge-clear'>LIVE SYSTEM</span>
-            <p style='color: #7d8590; font-size: 0.8rem; margin-top: 5px;'>East Coast India Corridor</p>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+st.sidebar.caption(f"Port Draft Limit: {auto_max_draft}m | Req: {vessel_info['required_draft']}m")
+st.sidebar.caption(f"Demurrage Rate: ${demurrage_rate:,.0f} / day")
 
 # ---------------------------------------------------------
 # ENGINE CALCULATIONS
@@ -290,80 +186,47 @@ laycan_start = (today + datetime.timedelta(days=12)).strftime("%d %b %Y")
 laycan_end = (today + datetime.timedelta(days=18)).strftime("%d %b %Y")
 
 # ---------------------------------------------------------
-# TOP BANNER: RISK MITIGATION & DECISION ENGINE
+# DASHBOARD HEADER
+# ---------------------------------------------------------
+title_col, badge_col = st.columns([3, 1])
+with title_col:
+    st.title("⚓ HEXAKADAL Commercial Decision Engine")
+    st.caption("AI-Powered Chartering & Risk Mitigation Engine | East Coast India Corridor")
+with badge_col:
+    st.write("")
+    st.info("🟢 LIVE TELEMETRY CONNECTED")
+
+st.markdown("---")
+
+# ---------------------------------------------------------
+# EXECUTIVE ACTION SIGNAL BANNER
 # ---------------------------------------------------------
 if ndv > 0:
-    st.markdown(f"""
-        <div style='background: rgba(248, 81, 73, 0.1); border: 1px solid #f85149; border-radius: 10px; padding: 18px; margin-bottom: 25px;'>
-            <div style='display: flex; align-items: center; justify-content: space-between;'>
-                <div>
-                    <h3 style='color: #f85149; margin: 0; font-size: 1.15rem;'>🚨 EXECUTIVE ACTION SIGNAL: WAIT / DEFER FIXING</h3>
-                    <p style='color: #f0f6fc; margin: 8px 0 0 0; font-size: 0.95rem;'>
-                        <strong>Optimal Charter Fixing Date:</strong> <span style='color: #58a6ff;'>{target_fix_date}</span> (In 7 Days) | 
-                        <strong>Recommended Laycan:</strong> <span style='color: #58a6ff;'>{laycan_start} to {laycan_end}</span>
-                    </p>
-                </div>
-                <div>
-                    <span style='background-color: #f85149; color: #ffffff; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 0.9rem;'>NET SAVINGS: ${ndv:,.2f}</span>
-                </div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+    st.error(
+        f"🚨 **EXECUTIVE ACTION SIGNAL: WAIT / DEFER FIXING**\n\n"
+        f"• **Optimal Fixing Date:** `{target_fix_date}` (In 7 Days)\n\n"
+        f"• **Recommended Laycan Window:** `{laycan_start}` to `{laycan_end}`\n\n"
+        f"• **Projected Net Benefit:** **${ndv:,.2f}** (Net savings after demurrage adjustment)"
+    )
 else:
-    st.markdown(f"""
-        <div style='background: rgba(46, 160, 67, 0.1); border: 1px solid #2ea043; border-radius: 10px; padding: 18px; margin-bottom: 25px;'>
-            <div style='display: flex; align-items: center; justify-content: space-between;'>
-                <div>
-                    <h3 style='color: #3fb950; margin: 0; font-size: 1.15rem;'>⚡ EXECUTIVE ACTION SIGNAL: FIX IMMEDIATELY</h3>
-                    <p style='color: #f0f6fc; margin: 8px 0 0 0; font-size: 0.95rem;'>
-                        <strong>Optimal Charter Fixing Date:</strong> <span style='color: #3fb950;'>Today ({today.strftime('%d %b %Y')})</span> | 
-                        Lock spot rates immediately to avoid price escalation.
-                    </p>
-                </div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
-# Executive Metric Cards Row
-c1, c2, c3, c4 = st.columns(4)
-
-with c1:
-    st.markdown(f"""
-        <div class='metric-card'>
-            <div class='metric-title'>Net Decision Value (NDV)</div>
-            <div class='metric-value' style='color: #3fb950;'>${ndv:,.2f}</div>
-            <div class='metric-subtext'>Risk-Adjusted Return</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with c2:
-    st.markdown(f"""
-        <div class='metric-card'>
-            <div class='metric-title'>Potential Freight Savings</div>
-            <div class='metric-value' style='color: #58a6ff;'>${potential_savings:,.2f}</div>
-            <div class='metric-subtext'>Via 7-Day Deferred Fixing</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with c3:
-    st.markdown(f"""
-        <div class='metric-card'>
-            <div class='metric-title'>Demurrage Loss Risk</div>
-            <div class='metric-value' style='color: #f85149;'>${demurrage_risk:,.2f}</div>
-            <div class='metric-subtext'>Estimated Port Congestion Risk</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with c4:
-    st.markdown(f"""
-        <div class='metric-card'>
-            <div class='metric-title'>Total Congestion Delay</div>
-            <div class='metric-value' style='color: #d29922;'>{total_delay:.1f} Hrs</div>
-            <div class='metric-subtext'>Tidal & Queue Congestion</div>
-        </div>
-    """, unsafe_allow_html=True)
+    st.success(
+        f"⚡ **EXECUTIVE ACTION SIGNAL: FIX IMMEDIATELY**\n\n"
+        f"• **Optimal Fixing Date:** `Today ({today.strftime('%d %b %Y')})`\n\n"
+        f"• **Action:** Lock current spot market rates immediately to mitigate market volatility."
+    )
 
 st.markdown("<br>", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# METRICS ROW
+# ---------------------------------------------------------
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("Net Decision Value (NDV)", f"${ndv:,.2f}", delta=f"+${ndv:,.0f} Benefit")
+m2.metric("Freight Savings Potential", f"${potential_savings:,.2f}", delta=f"-${current_rate - target_rate:.2f}/MT Rate Drop")
+m3.metric("Demurrage Loss Risk", f"${demurrage_risk:,.2f}", delta=f"-{total_delay:.1f} Hrs Risk", delta_color="inverse")
+m4.metric("Total Congestion Delay", f"{total_delay:.1f} Hours", delta=f"{ais_vessels} Vessels Waiting", delta_color="off")
+
+st.markdown("---")
 
 # ---------------------------------------------------------
 # 3 CORE ENGINE MODULE CARDS
@@ -371,84 +234,32 @@ st.markdown("<br>", unsafe_allow_html=True)
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown(f"""
-        <div class='module-card'>
-            <div class='module-header'>
-                <span>📈 Module 1: Freight Analytics</span>
-                <span class='badge-clear'>CLEAR</span>
-            </div>
-            <p style='color: #8b949e; font-size: 0.85rem; margin-bottom: 15px;'>Predictive Spot Rate Intelligence</p>
-            <div style='margin-bottom: 12px;'>
-                <span style='color: #8b949e; font-size: 0.85rem;'>Current Freight Rate:</span><br>
-                <strong style='color: #f0f6fc; font-size: 1.1rem;'>${current_rate:.2f} / MT</strong>
-            </div>
-            <div style='margin-bottom: 15px;'>
-                <span style='color: #8b949e; font-size: 0.85rem;'>7-Day AI Target Rate:</span><br>
-                <strong style='color: #3fb950; font-size: 1.2rem;'>${target_rate:.2f} / MT</strong>
-            </div>
-            <div style='background: #0d1117; padding: 12px; border-radius: 8px; border: 1px solid #21262d;'>
-                <p style='color: #8b949e; font-size: 0.8rem; margin: 0;'>
-                    💡 <strong>Market Outlook:</strong> BDI indices & fuel trend show a <strong>${current_rate - target_rate:.2f}/MT drop</strong>.
-                </p>
-            </div>
-            <p style='color: #7d8590; font-size: 0.75rem; margin-top: 15px; margin-bottom: 0;'>Model: LSTM Neural Net | Confidence: 92.4%</p>
-        </div>
-    """, unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("### 📈 Module 1: Freight Analytics")
+        st.success("STATUS: CLEAR")
+        st.markdown(f"**Current Spot Rate:** `${current_rate:.2f} / MT`")
+        st.markdown(f"**7-Day AI Target Rate:** `${target_rate:.2f} / MT`")
+        st.info(f"💡 **Market Rationale:** BDI & fuel index forecast a **${current_rate - target_rate:.2f}/MT** rate reduction.")
+        st.caption("Model: LSTM Neural Network | Confidence: 92.4%")
 
 with col2:
-    status_badge = "<span class='badge-clear'>CLEAR</span>" if vessel_info["is_safe"] else "<span class='badge-risk'>DRAFT RISK</span>"
-    
-    st.markdown(f"""
-        <div class='module-card'>
-            <div class='module-header'>
-                <span>🚢 Module 2: Vessel Feasibility</span>
-                {status_badge}
-            </div>
-            <p style='color: #8b949e; font-size: 0.85rem; margin-bottom: 15px;'>Navigation Safety & Draft Optimization</p>
-            <div style='margin-bottom: 10px;'>
-                <span style='color: #8b949e; font-size: 0.85rem;'>Optimal Vessel:</span><br>
-                <strong style='color: #58a6ff; font-size: 1rem;'>{vessel_info['vessel_name']}</strong>
-            </div>
-            <div style='display: flex; gap: 20px; margin-bottom: 15px;'>
-                <div>
-                    <span style='color: #8b949e; font-size: 0.8rem;'>Vessel Draft:</span><br>
-                    <strong style='color: #f0f6fc;'>{vessel_info['vessel_draft']}m</strong>
-                </div>
-                <div>
-                    <span style='color: #8b949e; font-size: 0.8rem;'>Port Limit:</span><br>
-                    <strong style='color: #f0f6fc;'>{auto_max_draft}m</strong>
-                </div>
-            </div>
-            <div style='background: #0d1117; padding: 12px; border-radius: 8px; border: 1px solid #21262d;'>
-                <p style='color: #8b949e; font-size: 0.8rem; margin: 0;'>
-                    ⚡ <strong>Eco-Speed:</strong> {vessel_info['eco_speed']} | <strong>Fuel:</strong> {vessel_info['fuel_cons']}
-                </p>
-            </div>
-            <p style='color: #7d8590; font-size: 0.75rem; margin-top: 15px; margin-bottom: 0;'>Draft Safety Engine: Active</p>
-        </div>
-    """, unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("### 🚢 Module 2: Vessel Feasibility")
+        if vessel_info["is_safe"]:
+            st.success("STATUS: DRAFT CLEAR")
+        else:
+            st.error("STATUS: PORT DRAFT RESTRICTED")
+        
+        st.markdown(f"**Optimal Ship:** `{vessel_info['vessel_name']}`")
+        st.markdown(f"**Vessel Draft:** `{vessel_info['vessel_draft']}m` | **Port Limit:** `{auto_max_draft}m`")
+        st.warning(f"⚡ **Eco-Speed:** {vessel_info['eco_speed']} | **Fuel:** {vessel_info['fuel_cons']}")
+        st.caption("Navigation Safety & Draft Constraints Engine: Active")
 
 with col3:
-    st.markdown(f"""
-        <div class='module-card'>
-            <div class='module-header'>
-                <span>⏳ Module 3: Port IDLE Engine</span>
-                <span class='badge-risk'>CONGESTED</span>
-            </div>
-            <p style='color: #8b949e; font-size: 0.85rem; margin-bottom: 15px;'>AIS Congestion & Weather Tracker</p>
-            <div style='margin-bottom: 10px;'>
-                <span style='color: #8b949e; font-size: 0.85rem;'>Anchorage Queue:</span><br>
-                <strong style='color: #f85149; font-size: 1.1rem;'>{ais_vessels} Bulk Vessels Waiting</strong>
-            </div>
-            <div style='margin-bottom: 15px;'>
-                <span style='color: #8b949e; font-size: 0.85rem;'>Marine Weather:</span><br>
-                <strong style='color: #f0f6fc;'>{wave_height}m Wave Height (Moderate Swell)</strong>
-            </div>
-            <div style='background: #0d1117; padding: 12px; border-radius: 8px; border: 1px solid #21262d;'>
-                <p style='color: #8b949e; font-size: 0.8rem; margin: 0;'>
-                    ⏱️ <strong>Idle Delay:</strong> +{total_delay:.1f} Hours estimated at berth.
-                </p>
-            </div>
-            <p style='color: #7d8590; font-size: 0.75rem; margin-top: 15px; margin-bottom: 0;'>AIS Satellite Geofence Telemetry: Connected</p>
-        </div>
-    """, unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("### ⏳ Module 3: Port IDLE Engine")
+        st.warning("STATUS: CONGESTED")
+        st.markdown(f"**Anchorage Queue:** `{ais_vessels} Bulk Vessels Waiting`")
+        st.markdown(f"**Marine Weather:** `{wave_height}m Wave Height` (Swell)")
+        st.error(f"⏱️ **Projected Idle Delay:** `+{total_delay:.1f} Hours` at berth")
+        st.caption("AIS Satellite Geofence & Marine API: Connected")
