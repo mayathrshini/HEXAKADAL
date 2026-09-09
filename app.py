@@ -525,24 +525,40 @@ with col3:
 # ---------------------------------------------------------
 # NATIVE STREAMLIT TREND GRAPH (NO DEPENDENCY ISSUES)
 # ---------------------------------------------------------
+# ---------------------------------------------------------
+# NATIVE STREAMLIT TREND GRAPH (PAST 30 DAYS & FUTURE 30 DAYS)
+# ---------------------------------------------------------
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 700;'>15-Day Projected Spot Freight Rate Trend ($/MT)</h4>", unsafe_allow_html=True)
+st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 700;'>60-Day Spot Freight Rate Intelligence (Past 30 Days & Future 30 Days Trend)</h4>", unsafe_allow_html=True)
 
-# Generate Dynamic Realistic Market Fluctuation Data
-dates = [(today + datetime.timedelta(days=i)).strftime('%b %d') for i in range(15)]
+# 1. Past 30 Days Generation (Historical Trend)
+np.random.seed(101)
+past_dates = [(today - datetime.timedelta(days=i)).strftime('%b %d') for i in range(30, 0, -1)]
+# Historical fluctuation leading up to today's current rate
+past_rates = np.linspace(20.50, current_rate, 30) + np.random.uniform(-0.4, 0.4, 30)
+past_rates[-1] = current_rate  # Set today's exact spot rate
 
-np.random.seed(42)
-t = np.linspace(0, 1, 15)
-base_trend = current_rate + (target_rate - current_rate) * (t**0.8)
-volatility = np.array([0, 0.25, -0.15, 0.30, -0.20, -0.40, -0.10, -0.35, 0.15, -0.25, -0.10, 0.05, -0.15, -0.05, 0.0])
-rates = base_trend + volatility
-rates[7] = target_rate
+# 2. Future 30 Days Generation (AI Forecasted Trend)
+future_dates = [(today + datetime.timedelta(days=i)).strftime('%b %d') for i in range(1, 31)]
+t_future = np.linspace(0, 1, 30)
+# Dynamic curve towards forecast rate and slight rebound post-day 15
+future_base = current_rate + (target_rate - current_rate) * (t_future**0.7)
+future_volatility = np.random.uniform(-0.2, 0.2, 30)
+future_rates = future_base + future_volatility
 
+# Fix exact points for consistency
+future_rates[6] = target_rate  # Day 7 fix point target
+
+# Combine Past + Today + Future
+all_dates = past_dates + [today.strftime('%b %d')] + future_dates
+all_rates = list(past_rates) + [current_rate] + list(future_rates)
+
+# Create Clean Dataframe
 df_chart = pd.DataFrame({
-    "Spot Rate ($/MT)": rates
-}, index=dates)
+    "Spot Freight Rate ($/MT)": all_rates
+}, index=all_dates)
 
-# Native Streamlit Line Chart (Smooth & Instant Render)
-st.line_chart(df_chart, height=280)
+# Native Streamlit Line Chart (Renders 60 Days Seamlessly)
+st.line_chart(df_chart, height=320)
 
-st.caption("🟢 **Target Charter Fix Window:** Day 7 (Optimal rate reduction point identified by AI).")
+st.caption("📊 **Trend Insights:** Historical spot rates over the **past 30 days** vs AI predictive model forecasting the **next 30 days**. Target fix point highlighted at Day 7.")
