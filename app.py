@@ -290,26 +290,27 @@ st.sidebar.caption(f"**Port Depth Limit:** {auto_max_draft}m | **Req:** {vessel_
 st.sidebar.caption(f"**Demurrage Benchmark:** ${demurrage_rate:,.0f} / day")
 
 # ---------------------------------------------------------
-# ENGINE CALCULATIONS
+# ENGINE CALCULATIONS (DYNAMIC INTEGRATION)
 # ---------------------------------------------------------
 current_rate = 18.50
 target_rate = 16.28
 m1_output = {"current_spot_rate": current_rate, "forecast_spot_rate": target_rate}
 
+# Dynamic Module 3 Telemetry Retrieval
 if Module3IDEL is not None:
     try:
         m3_engine = Module3IDEL()
         m3_telemetry = m3_engine.get_port_telemetry(port_name=destination_port, vessel_draft=auto_vessel_draft)
-        wave_height = m3_telemetry.get("live_wave_height_m", 2.4)
-        total_delay = m3_telemetry.get("anchorage_queue_hours", 25.7)
+        wave_height = m3_telemetry.get("live_wave_height_m", 1.8)
+        total_delay = m3_telemetry.get("anchorage_queue_hours", 27.4)
         ais_vessels = m3_telemetry.get("ais_waiting_vessels", 9)
     except Exception:
-        wave_height = 2.4
-        total_delay = 25.7
+        wave_height = 1.8
+        total_delay = 27.4
         ais_vessels = 9
 else:
-    wave_height = 2.4
-    total_delay = 25.7
+    wave_height = 1.8
+    total_delay = 27.4
     ais_vessels = 9
 
 m2_is_safe = vessel_info["is_safe"]
@@ -353,7 +354,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# EXECUTIVE DECISION BANNER (NO MODULE 4 MENTION)
+# EXECUTIVE DECISION BANNER (CLEAN ENTERPRISE)
 # ---------------------------------------------------------
 if ndv > 0:
     st.markdown(f"""
