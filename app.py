@@ -5,6 +5,11 @@ import datetime
 
 # Safe Imports of Custom Modules
 try:
+    from module1_forecaster import Module1FreightForecaster
+except ImportError:
+    Module1FreightForecaster = None
+
+try:
     from module4_risk_engine import Module4RiskEngine
 except ImportError:
     Module4RiskEngine = None
@@ -75,7 +80,7 @@ st.markdown("""
         margin-left: 10px;
     }
     
-    /* Decision Action Banner (Light Blue Glow) */
+    /* Decision Action Banner */
     .decision-banner {
         background-color: #f0f9ff;
         border-left: 5px solid #0284c7;
@@ -98,7 +103,7 @@ st.markdown("""
         color: #334155;
     }
 
-    /* Metric Cards (Ice Blue & Slate) */
+    /* Metric Cards */
     .metric-box {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -215,7 +220,7 @@ port_draft_database = {
 
 auto_max_draft = port_draft_database.get(destination_port, 14.50)
 
-# Vessel Optimization Function
+# Vessel Optimization Logic
 def optimize_vessel_data(cargo_tons, port_max_draft):
     if cargo_tons >= 200000:
         ideal_vessel = "MV ORE BRASIL (400k DWT Valemax)"
@@ -290,11 +295,24 @@ st.sidebar.caption(f"**Port Depth Limit:** {auto_max_draft}m | **Req:** {vessel_
 st.sidebar.caption(f"**Demurrage Benchmark:** ${demurrage_rate:,.0f} / day")
 
 # ---------------------------------------------------------
-# ENGINE CALCULATIONS (DYNAMIC INTEGRATION)
+# ENGINE CALCULATIONS (FULLY DYNAMIC INTEGRATION)
 # ---------------------------------------------------------
-current_rate = 18.50
-target_rate = 16.28
-m1_output = {"current_spot_rate": current_rate, "forecast_spot_rate": target_rate}
+
+# Dynamic Module 1 Integration (Using Friend's Baltic Forecaster Module)
+if Module1FreightForecaster is not None:
+    try:
+        forecaster = Module1FreightForecaster()
+        m1_output = forecaster.predict_15d_rate()
+        current_rate = m1_output.get("current_spot_rate", 18.50)
+        target_rate = m1_output.get("forecast_spot_rate", 16.28)
+    except Exception:
+        current_rate = 18.50
+        target_rate = 16.28
+        m1_output = {"current_spot_rate": current_rate, "forecast_spot_rate": target_rate}
+else:
+    current_rate = 18.50
+    target_rate = 16.28
+    m1_output = {"current_spot_rate": current_rate, "forecast_spot_rate": target_rate}
 
 # Dynamic Module 3 Telemetry Retrieval
 if Module3IDEL is not None:
@@ -315,6 +333,7 @@ else:
 
 m2_is_safe = vessel_info["is_safe"]
 
+# Dynamic Module 4 Risk Engine Evaluation
 if Module4RiskEngine is not None:
     try:
         engine = Module4RiskEngine(daily_demurrage_rate=demurrage_rate)
@@ -354,7 +373,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# EXECUTIVE DECISION BANNER (CLEAN ENTERPRISE)
+# EXECUTIVE DECISION BANNER
 # ---------------------------------------------------------
 if ndv > 0:
     st.markdown(f"""
