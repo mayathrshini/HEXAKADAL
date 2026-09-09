@@ -527,69 +527,71 @@ with col3:
 # ---------------------------------------------------------
 # ---------------------------------------------------------
 # ---------------------------------------------------------
-# NATIVE STREAMLIT TREND GRAPH (AUGUST TO SEPTEMBER ORDER-WISE)
+# NATIVE STREAMLIT TREND GRAPH (CHRONOLOGICAL MONTH ORDER)
 # ---------------------------------------------------------
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 700;'>60-Day Spot Freight Rate Intelligence (August – September Continuous Trend)</h4>", unsafe_allow_html=True)
+st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 700;'>Spot Freight Rate Intelligence (Chronological Timeline: Aug - Sep - Oct)</h4>", unsafe_allow_html=True)
 
-# 1. Timeline Generation (Continuous Dates from Past August to Future September)
+# 1. Timeline Generation (True Datetime Objects for Exact Chronological Sorting)
+# Generates 30 Days Past + Today + 30 Days Future (Total 61 continuous dates)
 start_date = today - datetime.timedelta(days=30)
-date_list = [start_date + datetime.timedelta(days=i) for i in range(61)]
-formatted_dates = [d.strftime('%d %b') for d in date_list]
+date_objects = [start_date + datetime.timedelta(days=i) for i in range(61)]
 
-# 2. Dynamic Freight Rate Calculation
+# 2. Freight Rate Calculations
 np.random.seed(101)
-# August (Past 30 Days) - Fluctuating down to today's spot rate
+# Past 30 Days (August) Trend
 past_rates = np.linspace(20.50, current_rate, 30) + np.random.uniform(-0.35, 0.35, 30)
 
-# Today (Current Rate)
+# Today Rate
 today_rate = [current_rate]
 
-# September (Future 30 Days) - AI Forecast curve reaching minimum target rate
+# Future 30 Days (September / October) Forecast
 t_future = np.linspace(0, 1, 30)
 future_base = current_rate + (target_rate - current_rate) * (t_future**0.7)
 future_rates = future_base + np.random.uniform(-0.25, 0.25, 30)
-future_rates[6] = target_rate  # Target optimal fixing point (Day 7)
+future_rates[6] = target_rate  # Day 7 fix point
 
-# Combine into continuous 61-day array
+# Combine rates
 all_rates = np.concatenate([past_rates, today_rate, future_rates])
 all_rates = np.round(all_rates, 2)
 
-# 3. Identify Maximum (High Point) & Minimum (Low Point) Rates
+# 3. Identify High Point (Peak) and Low Point (Minimum Rate)
 max_rate = float(np.max(all_rates))
 min_rate = float(np.min(all_rates))
 
 max_index = int(np.argmax(all_rates))
 min_index = int(np.argmin(all_rates))
 
-max_date_str = formatted_dates[max_index]
-min_date_str = formatted_dates[min_index]
+max_date_str = date_objects[max_index].strftime('%d %b')
+min_date_str = date_objects[min_index].strftime('%d %b')
 
-# Create Dataframe for Streamlit Line Chart
+# 4. Build DataFrame using Pandas DatetimeIndex (Ensures Perfect Chronological Order)
 df_chart = pd.DataFrame({
     "Spot Freight Rate ($/MT)": all_rates
-}, index=formatted_dates)
+}, index=pd.to_datetime(date_objects))
 
-# Render Chart
-st.line_chart(df_chart, height=300)
+# Render Line Chart
+st.line_chart(df_chart, height=320)
 
-# Display High Point & Low Point Highlights
+# Display Peak & Low Point Highlight Cards
 col_high, col_low = st.columns(2)
 
 with col_high:
     st.markdown(f"""
-        <div style='background-color: #fef2f2; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 6px;'>
+        <div style='background-color: #fef2f2; border: 1px solid #fecaca; padding: 12px 16px; border-radius: 6px;'>
             <span style='color: #991b1b; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;'>📈 Maximum Freight Rate (Peak)</span><br>
-            <strong style='color: #b91c1c; font-size: 1.1rem;'>${max_rate:.2f} / MT</strong> 
-            <span style='color: #7f1d1d; font-size: 0.8rem;'> ({max_date_str})</span>
+            <strong style='color: #b91c1c; font-size: 1.2rem;'>${max_rate:.2f} / MT</strong> 
+            <span style='color: #7f1d1d; font-size: 0.85rem;'>({max_date_str})</span>
         </div>
     """, unsafe_allow_html=True)
 
 with col_low:
     st.markdown(f"""
-        <div style='background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 6px;'>
-            <span style='color: #166534; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;'>📉 Minimum Freight Rate (Optimal Fix)</span><br>
-            <strong style='color: #15803d; font-size: 1.1rem;'>${min_rate:.2f} / MT</strong> 
-            <span style='color: #14532d; font-size: 0.8rem;'> ({min_date_str})</span>
+        <div style='background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px 16px; border-radius: 6px;'>
+            <span style='color: #166534; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;'>📉 Minimum Freight Rate (Optimal Fix Target)</span><br>
+            <strong style='color: #15803d; font-size: 1.2rem;'>${min_rate:.2f} / MT</strong> 
+            <span style='color: #14532d; font-size: 0.85rem;'>({min_date_str})</span>
         </div>
     """, unsafe_allow_html=True)
+
+st.caption("📊 **Chronological Order Fixed:** Graph dynamically maintains real date progression from August ➔ September ➔ October with automated peak and minimum detection.")
