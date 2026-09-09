@@ -526,39 +526,70 @@ with col3:
 # NATIVE STREAMLIT TREND GRAPH (NO DEPENDENCY ISSUES)
 # ---------------------------------------------------------
 # ---------------------------------------------------------
-# NATIVE STREAMLIT TREND GRAPH (PAST 30 DAYS & FUTURE 30 DAYS)
+# ---------------------------------------------------------
+# NATIVE STREAMLIT TREND GRAPH (AUGUST TO SEPTEMBER ORDER-WISE)
 # ---------------------------------------------------------
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 700;'>60-Day Spot Freight Rate Intelligence (Past 30 Days & Future 30 Days Trend)</h4>", unsafe_allow_html=True)
+st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 700;'>60-Day Spot Freight Rate Intelligence (August – September Continuous Trend)</h4>", unsafe_allow_html=True)
 
-# 1. Past 30 Days Generation (Historical Trend)
+# 1. Timeline Generation (Continuous Dates from Past August to Future September)
+start_date = today - datetime.timedelta(days=30)
+date_list = [start_date + datetime.timedelta(days=i) for i in range(61)]
+formatted_dates = [d.strftime('%d %b') for d in date_list]
+
+# 2. Dynamic Freight Rate Calculation
 np.random.seed(101)
-past_dates = [(today - datetime.timedelta(days=i)).strftime('%b %d') for i in range(30, 0, -1)]
-# Historical fluctuation leading up to today's current rate
-past_rates = np.linspace(20.50, current_rate, 30) + np.random.uniform(-0.4, 0.4, 30)
-past_rates[-1] = current_rate  # Set today's exact spot rate
+# August (Past 30 Days) - Fluctuating down to today's spot rate
+past_rates = np.linspace(20.50, current_rate, 30) + np.random.uniform(-0.35, 0.35, 30)
 
-# 2. Future 30 Days Generation (AI Forecasted Trend)
-future_dates = [(today + datetime.timedelta(days=i)).strftime('%b %d') for i in range(1, 31)]
+# Today (Current Rate)
+today_rate = [current_rate]
+
+# September (Future 30 Days) - AI Forecast curve reaching minimum target rate
 t_future = np.linspace(0, 1, 30)
-# Dynamic curve towards forecast rate and slight rebound post-day 15
 future_base = current_rate + (target_rate - current_rate) * (t_future**0.7)
-future_volatility = np.random.uniform(-0.2, 0.2, 30)
-future_rates = future_base + future_volatility
+future_rates = future_base + np.random.uniform(-0.25, 0.25, 30)
+future_rates[6] = target_rate  # Target optimal fixing point (Day 7)
 
-# Fix exact points for consistency
-future_rates[6] = target_rate  # Day 7 fix point target
+# Combine into continuous 61-day array
+all_rates = np.concatenate([past_rates, today_rate, future_rates])
+all_rates = np.round(all_rates, 2)
 
-# Combine Past + Today + Future
-all_dates = past_dates + [today.strftime('%b %d')] + future_dates
-all_rates = list(past_rates) + [current_rate] + list(future_rates)
+# 3. Identify Maximum (High Point) & Minimum (Low Point) Rates
+max_rate = float(np.max(all_rates))
+min_rate = float(np.min(all_rates))
 
-# Create Clean Dataframe
+max_index = int(np.argmax(all_rates))
+min_index = int(np.argmin(all_rates))
+
+max_date_str = formatted_dates[max_index]
+min_date_str = formatted_dates[min_index]
+
+# Create Dataframe for Streamlit Line Chart
 df_chart = pd.DataFrame({
     "Spot Freight Rate ($/MT)": all_rates
-}, index=all_dates)
+}, index=formatted_dates)
 
-# Native Streamlit Line Chart (Renders 60 Days Seamlessly)
-st.line_chart(df_chart, height=320)
+# Render Chart
+st.line_chart(df_chart, height=300)
 
-st.caption("📊 **Trend Insights:** Historical spot rates over the **past 30 days** vs AI predictive model forecasting the **next 30 days**. Target fix point highlighted at Day 7.")
+# Display High Point & Low Point Highlights
+col_high, col_low = st.columns(2)
+
+with col_high:
+    st.markdown(f"""
+        <div style='background-color: #fef2f2; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 6px;'>
+            <span style='color: #991b1b; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;'>📈 Maximum Freight Rate (Peak)</span><br>
+            <strong style='color: #b91c1c; font-size: 1.1rem;'>${max_rate:.2f} / MT</strong> 
+            <span style='color: #7f1d1d; font-size: 0.8rem;'> ({max_date_str})</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col_low:
+    st.markdown(f"""
+        <div style='background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 6px;'>
+            <span style='color: #166534; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;'>📉 Minimum Freight Rate (Optimal Fix)</span><br>
+            <strong style='color: #15803d; font-size: 1.1rem;'>${min_rate:.2f} / MT</strong> 
+            <span style='color: #14532d; font-size: 0.8rem;'> ({min_date_str})</span>
+        </div>
+    """, unsafe_allow_html=True)
