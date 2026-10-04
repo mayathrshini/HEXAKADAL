@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { onBackendStatusChange } from '../services/api';
 import { 
   Anchor, 
   LayoutDashboard, 
@@ -21,6 +22,15 @@ const navItems = [
 ];
 
 export default function Navbar({ activeTab, setActiveTab, alertCount = 4 }) {
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onBackendStatusChange((live) => {
+      setIsLive(live);
+    });
+    return unsubscribe;
+  }, []);
+
   return (
     <header className="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-50 px-4 lg:px-8 py-3.5">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
@@ -73,10 +83,21 @@ export default function Navbar({ activeTab, setActiveTab, alertCount = 4 }) {
 
         {/* Backend Status Pill */}
         <div className="hidden xl:flex items-center gap-2 text-xs font-mono bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          <span className="text-emerald-400 font-semibold">API LIVE</span>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-300">Port 8081</span>
+          {isLive ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span className="text-emerald-400 font-semibold">API LIVE</span>
+              <span className="text-slate-500">|</span>
+              <span className="text-slate-300">Port 8081</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span className="text-amber-400 font-semibold">OFFLINE (DEMO)</span>
+              <span className="text-slate-500">|</span>
+              <span className="text-slate-400">Mock Data</span>
+            </>
+          )}
         </div>
       </div>
     </header>

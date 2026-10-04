@@ -10,7 +10,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   </head>
   <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
+    <noscript>
+      <div style="padding: 2rem; text-align: center; color: #f87171; font-family: monospace; background: #0f172a; min-height: 100vh;">
+        <h2>JavaScript Required</h2>
+        <p>Please enable JavaScript in your browser to run HEXAKADAL Decision Support System.</p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if (window.location.protocol === 'file:') {
+        setTimeout(function() {
+          var root = document.getElementById('root');
+          if (root && root.children.length === 0) {
+            var warn = document.createElement('div');
+            warn.style.cssText = 'padding: 24px; margin: 24px auto; max-width: 600px; background: #1e1b4b; border: 1px solid #6366f1; border-radius: 12px; color: #e0e7ff; font-family: sans-serif; text-align: center;';
+            warn.innerHTML = '<h3 style="margin-top:0; color:#818cf8;">Direct File Opening Detected</h3><p style="font-size:14px; line-height:1.5;">Vite React single page applications cannot execute module scripts directly via the <code>file:///</code> protocol.</p><p style="font-size:13px; color:#cbd5e1;">Please run <b><code>npm run dev</code></b> or <b><code>npm run preview</code></b> inside the <code>frontend/</code> folder and visit <b><code>http://localhost:5173</code></b>.</p>';
+            document.body.appendChild(warn);
+          }
+        }, 1200);
+      }
+    </script>
   </body>
 </html>

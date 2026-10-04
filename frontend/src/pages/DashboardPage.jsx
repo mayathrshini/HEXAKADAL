@@ -49,10 +49,10 @@ export default function DashboardPage() {
     { day: 'Day -7', rate: 19.20 },
     { day: 'Day -5', rate: 18.90 },
     { day: 'Day -2', rate: 18.65 },
-    { day: 'Today (Spot)', rate: data?.currentSpotRate || 18.50 },
+    { day: 'Today (Spot)', rate: data?.currentSpotRate ?? 18.50 },
     { day: 'Day +5 (FC)', rate: 17.80 },
     { day: 'Day +10 (FC)', rate: 16.90 },
-    { day: 'Day +15 (FC)', rate: data?.targetForecastRate || 16.28 }
+    { day: 'Day +15 (FC)', rate: data?.targetForecastRate ?? 16.28 }
   ];
 
   if (loading && !data) {
@@ -130,7 +130,7 @@ export default function DashboardPage() {
         <KpiCard
           title="Freight Savings (USD)"
           value={`$${(data?.freightSavings || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`}
-          subtitle={`Forecasted $${(data?.currentSpotRate - data?.targetForecastRate).toFixed(2)}/MT drop`}
+          subtitle={`Forecasted $${((data?.currentSpotRate ?? 18.50) - (data?.targetForecastRate ?? 16.28)).toFixed(2)}/MT drop`}
           icon={TrendingUp}
           color="cyan"
         />
@@ -163,11 +163,11 @@ export default function DashboardPage() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-slate-400">
               <span>Current Spot Rate:</span>
-              <span className="font-mono text-white font-semibold">${data?.currentSpotRate?.toFixed(2)} / MT</span>
+              <span className="font-mono text-white font-semibold">${(data?.currentSpotRate ?? 18.50).toFixed(2)} / MT</span>
             </div>
             <div className="flex justify-between text-slate-400">
               <span>15-Day XGBoost Target:</span>
-              <span className="font-mono text-cyan-400 font-semibold">${data?.targetForecastRate?.toFixed(2)} / MT</span>
+              <span className="font-mono text-cyan-400 font-semibold">${(data?.targetForecastRate ?? 16.28).toFixed(2)} / MT</span>
             </div>
             <div className="flex justify-between text-slate-400 text-xs">
               <span>Model Confidence:</span>
@@ -187,11 +187,11 @@ export default function DashboardPage() {
               {data?.selectedVessel || 'MV CAPESIZE HERO (180k DWT)'}
             </div>
             <div className="flex justify-between text-slate-400 text-xs">
-              <span>Vessel Draft: <strong className="text-white">{data?.vesselDraft} m</strong></span>
-              <span>Port Max Draft: <strong className="text-cyan-400">{data?.portMaxDraft} m</strong></span>
+              <span>Vessel Draft: <strong className="text-white">{data?.vesselDraft ?? 16.5} m</strong></span>
+              <span>Port Max Draft: <strong className="text-cyan-400">{data?.portMaxDraft ?? 17.5} m</strong></span>
             </div>
             <div className="pt-1">
-              {data?.vesselDraft <= data?.portMaxDraft ? (
+              {(data?.vesselDraft ?? 16.5) <= (data?.portMaxDraft ?? 17.5) ? (
                 <span className="inline-block bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold px-2.5 py-1 rounded-lg">
                   ✅ Safe Draft Clearance
                 </span>
@@ -213,7 +213,7 @@ export default function DashboardPage() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-slate-400">
               <span>Live Wave Height:</span>
-              <span className="font-mono text-amber-300 font-semibold">{data?.liveWaveHeight} m</span>
+              <span className="font-mono text-amber-300 font-semibold">{data?.liveWaveHeight ?? 2.4} m</span>
             </div>
             <div className="flex justify-between text-slate-400">
               <span>Sea Status:</span>

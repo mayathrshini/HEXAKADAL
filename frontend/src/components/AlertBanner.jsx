@@ -2,9 +2,10 @@ import React from 'react';
 import { AlertTriangle, CheckCircle, ShieldAlert, Info } from 'lucide-react';
 
 export default function AlertBanner({ signal = 'WAIT / DEFER FIXING', reason = '' }) {
-  let isPositive = signal.includes('FIX IMMEDIATELY') || signal.includes('FIX NOW');
-  let isWarning = signal.includes('WAIT') || signal.includes('DEFER');
-  let isDanger = signal.includes('REROUTE') || signal.includes('VIOLATION');
+  const safeSignal = signal || 'WAIT / DEFER FIXING';
+  let isPositive = safeSignal.includes('FIX IMMEDIATELY') || safeSignal.includes('FIX NOW');
+  let isWarning = safeSignal.includes('WAIT') || safeSignal.includes('DEFER');
+  let isDanger = safeSignal.includes('REROUTE') || safeSignal.includes('VIOLATION');
 
   let badgeColor = isDanger
     ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
